@@ -1,5 +1,13 @@
 import pygame
+from player import Player
+from mouse import Mouse
+from enemys import Enemys
+from playerinfo import Playerinfo
+from buymenu import Buymenu
+from hole import Hole
+from bush import Bush
 from tkinter import *
+
 
 coordinates_x = [0, 100, 200, 300, 400, 500, 600, 700]
 coordinates_y = [0, 100, 200, 300, 400, 500]
@@ -10,6 +18,19 @@ white = (255, 255, 255)
 red = (255, 0, 0)
 blue = (0, 0, 255)
 yellow = (255, 255, 0)
+
+
+def load_many_enemies_from_file(file):
+    my_dictionary = {}
+
+    for enemy in file:
+        name = enemy['goblin']
+        health = enemy['5']
+        alive_image = pygame.image.load(f"goblin.gif")
+        dead_image = pygame.image.load(f"goblin_dead.gif")
+        my_dictionary.update({name: {'health': health, 'alive_image': alive_image, 'dead_image': dead_image}})
+
+    return my_dictionary
 
 
 class Gamestate:
@@ -46,66 +67,6 @@ class Gamestate:
         pygame.display.update()
 
 
-class Bush(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.image.load("bush.gif")
-        self.rect = self.image.get_rect()
-        self.locx = [50, 150, 250, 350, 450, 550, 650]
-        self.locy = [50, 150, 250, 350, 450, 550]
-        self.rect.x = self.locx[2]
-        self.rect.y = self.locy[2]
-
-    def weaponfound(self):
-        if self.rect.colliderect(player.hitbox):
-            print("YOU FOUND AN AXE")
-            player.weapon = player.axe
-            self.rect.x = -100
-            self.rect.y = -100
-
-
-class Playerinfo:
-
-    def playerinfo(self):
-        fenster = Tk()
-        character = Label(text="CHARACTER")
-        character.pack()
-        level = Label(text="LEVEL:")
-        level.pack()
-        level2 = Label(text=player.lvl)
-        level2.pack()
-        exp = Label(text="EXPERIENCE:")
-        exp.pack()
-        exp2 = Label(text=player.xp)
-        exp2.pack()
-        score = Label(text="SCORE:")
-        score.pack()
-        score2 = Label(text=player.score)
-        score2.pack()
-        ore = Label(text="ORE:")
-        ore.pack()
-        ore2 = Label(text=player.ore)
-        ore2.pack()
-        potions = Label(text="POTIONS:")
-        potions.pack()
-        potions2 = Label(text=player.potions)
-        potions2.pack()
-        damage = Label(text="DAMAGE:")
-        damage.pack()
-        damage2 = Label(text=player.weapon)
-        damage2.pack()
-        armor = Label(text="ARMOR:")
-        armor.pack()
-        armor2 = Label(text=player.armor)
-        armor2.pack()
-        shield = Label(text="SHIELD PROTECTION:")
-        shield.pack()
-        shield2 = Label(text=player.currentshield)
-        shield2.pack()
-
-        fenster.mainloop()
-
-
 class Castle:
     def __init__(self):
         self.castleimg = pygame.image.load("castle.gif")
@@ -117,63 +78,6 @@ class Castle:
             gamestate.shop()
         if self.castlerect2.colliderect(player.hitbox):
             print("RAUS HIER")
-
-
-class Camera(pygame.sprite.Group):
-    def __init__(self):
-        super().__init__()
-        self.display_surface = pygame.display.get_surface()
-
-        self.camera_offset = pygame.math.Vector2()
-
-        self.ground_surf = pygame.image.load("background.gif").convert_alpha()
-        self.ground_rect = self.ground_surf.get_rect(topleft=(0, 0))
-
-    def custom_draw(self):
-        ground_offset = self.ground_rect.topleft + self.camera_offset
-
-        self.display_surface.blit(self.ground_surf, self.camera_offset)
-
-
-
-
-class Enemys:
-    def __init__(self):
-        self.enemys = pygame.image.load("goblin.gif")
-        self.enemysdead = pygame.image.load("goblin_dead.gif")
-        self.currentstate = self.enemys
-        self.life = 5
-        self.enemyx = [100, 200, 300, 400, 500, 600, 700]
-        self.enemyy = [100, 200, 300, 400, 500]
-        self.enemyrect = pygame.Rect(self.enemyx[2], self.enemyy[3], 32, 32)
-
-    def death(self):
-        if self.life < 0:
-            self.life = 0
-            print("IT'S DEAD!! +250XP")
-            player.xp += 250
-            player.score += 90
-            self.currentstate = self.enemysdead
-            enemys.enemyrect.x = -100
-            enemys.enemyrect.y = -100
-
-
-class Mouse:
-    def __init__(self):
-        self.posx, self.posy = pygame.mouse.get_pos()
-        self.mouserect = pygame.Rect(self.posx, self.posy, 2, 2)
-
-
-class Hole:
-    def __init__(self):
-        self.holerect = pygame.Rect(coordinates_x[4], coordinates_y[1], 15, 15)
-
-    def falling(self):
-        if hole.holerect.colliderect(player.hitbox):
-            player.life += -9
-            print("YOU HAVE FALLEN INTO A HOLE!")
-            player.playerx = 400
-            player.playery = 300
 
 
 class Text:
@@ -227,65 +131,12 @@ class Rock:
         if game.timesnrfinaltry3 == 0:
             game.screen.blit(self.rock_destroyed, (rock.rockx[7], rock.rocky[3]))
 
-
-class Player:
-    def __init__(self):
-        self.character = pygame.image.load("character.gif")
-        self.characterleft = pygame.image.load("character_links.gif")
-        self.characterdown = pygame.image.load("character_unten.gif")
-        self.characterright = pygame.image.load("character_rechts.gif")
-        self.currentchar = self.character
-        self.playerx = 400
-        self.playery = 300
-        self.armor = 0
-        self.life = 100
-        self.maxlife = 100
-        self.potions = 5
-        self.lvl = 1
-        self.mana = 50
-        self.maxmana = 50
-        self.xp = 0
-        self.ore = 0
-        self.score = 0
-        self.hitbox = pygame.Rect(self.playerx, self.playery, 15, 15)
-        self.sword = 1
-        self.axe = 2
-        self.bettersword = 3
-        self.weapon = self.sword
-        self.none = 1
-        self.shield = 2
-        self.currentshield = self.none
-
-    def movement(self, playerX_change, playerY_change):
-        self.playerx += playerX_change
-        self.playery += playerY_change
-
-    def gameover(self):
-        if player.life <= 0:
-            print("GAME OVER")
-            pygame.quit()
-            sys.exit()
-
-    def level2up(self):
-        if self.xp > 999:
-            self.lvl += 1
-            self.maxlife += 12
-            self.maxmana += 6
-            print("LEVEL UP!!!")
-            self.life = self.maxlife
-            self.mana = self.maxmana
-            self.xp = 0
-
-    def nomana(self):
-        if self.mana < 0:
-            self.mana = 0
-
-
 class Game:
     def __init__(self):
         pygame.init()
         self.width = 800
         self.height = 600
+        self.canvas = pygame.Surface((self.width, self.height))
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("ADVENTURE QUEST")
         self.explosionspell = pygame.image.load("explosion.gif")
@@ -308,8 +159,9 @@ class Game:
             pygame.draw.rect(self.screen, (perfectgreen), castle.castlerect)
             pygame.draw.rect(self.screen, (perfectgreen), rock.rockrect2)
             pygame.draw.rect(self.screen, (perfectgreen), rock.rockrect3)
-            pygame.draw.rect(self.screen, (perfectgreen), enemys.enemyrect)
             pygame.draw.rect(self.screen, (perfectgreen), castle.castlerect2)
+            pygame.draw.rect(game.screen, (100, 255, 100), enemys.enemyrect2)
+            game.screen.blit(enemys.currentstate, (enemys.enemyx, enemys.enemyy))
 
             self.screen.blit(self.background, (coordinates_x[0], coordinates_y[0]))
 
@@ -319,17 +171,15 @@ class Game:
 
             self.screen.blit(self.hole, (coordinates_x[4], coordinates_y[1]))
 
-            self.screen.blit(enemys.currentstate, (enemys.enemyx[2], enemys.enemyy[3]))
-
             self.screen.blit(castle.castleimg, (coordinates_x[5], coordinates_y[1]))
             self.screen.blit(castle.castleimg, (coordinates_x[1], coordinates_y[4]))
 
-            self.screen.blit(bush.image, (bush.locx[2], bush.locy[2]))
-            self.screen.blit(bush.image, (bush.locx[4], bush.locy[4]))
-            self.screen.blit(bush.image, (bush.locx[6], bush.locy[1]))
-            self.screen.blit(bush.image, (bush.locx[0], bush.locy[4]))
-            self.screen.blit(bush.image, (bush.locx[3], bush.locy[5]))
-            self.screen.blit(bush.image, (bush.locx[0], bush.locy[0]))
+            self.screen.blit(bush.image, (bush.locx, bush.locy))
+            self.screen.blit(bush.image, (bush.locx, bush.locy))
+            self.screen.blit(bush.image, (bush.locx, bush.locy))
+            self.screen.blit(bush.image, (bush.locx, bush.locy))
+            self.screen.blit(bush.image, (bush.locx, bush.locy))
+            self.screen.blit(bush.image, (bush.locx, bush.locy))
 
             self.screen.blit(player.currentchar, (player.playerx, player.playery))
 
@@ -356,11 +206,6 @@ class Game:
                         player.potions += -1
                         print("POTION DRANK ", player.potions, " LEFT")
                         player.life = player.maxlife
-                if event.type == pygame.MOUSEBUTTONDOWN and enemys.enemyrect.colliderect(mouse.mouserect) and player.hitbox.colliderect(enemys.enemyrect):
-                    enemys.life += -player.weapon
-                    print(enemys.life)
-                if enemys.enemyrect.colliderect(player.hitbox):
-                    player.life += -3 + player.currentshield
                 if event.type == pygame.MOUSEBUTTONDOWN and rock.rockrect.colliderect(mouse.mouserect) and player.hitbox.colliderect(rock.rockrect):
                     print("MINING")
                     self.timesnrfinaltry += -1
@@ -423,11 +268,22 @@ class Game:
 
             hole.falling()
             player.gameover()
+
+            bush2.__init__(200, 200)
+
+            enemys.__init__(400, 500)
+            enemys.getdamage()
+            enemys.makedamage()
             enemys.death()
+
+            enemys2.__init__(300, 300)
+            enemys.death()
+            enemys.getdamage()
+            enemys.makedamage()
+
             castle.collision()
             rock.__init__()
             text.__init__()
-            camera_group.__init__()
             mouse.__init__()
             bush.weaponfound()
             rock.nothingleft()
@@ -441,73 +297,28 @@ class Game:
             clock.tick(self.fps)
 
 
-class Buyshield(Button):
-
-    def buyshield(self):
-        if player.ore > 19:
-            player.currentshield = player.shield
-            player.ore += -20
-            print("THANK YOU VERY MUCH")
-        else:
-            print("NOT ENOUGH ORE")
-
-
-class Buybtrswrd(Button):
-
-    def buybtrswrd(self):
-        if player.ore > 29:
-            player.weapon = player.bettersword
-            player.ore += -30
-            print("THANK YOU VERY MUCH")
-        else:
-            print("NOT ENOUGH ORE")
-
-
-class Buymenu:
-
-    def buying(self):
-        fenster = Tk()
-        introtxt = Label(text="WHAT DO YOU WANT TO BUY?")
-        introtxt.pack()
-        btrswrd = Label(text="1. BETTER SWORD = 30 ORE")
-        btrswrd.pack()
-        btrswrdbuybtn = Buybtrswrd(text="BUY AND EQUIP BETTER SWORD")
-        btrswrdbuybtn["command"] = btrswrdbuybtn.buybtrswrd
-        btrswrdbuybtn.pack()
-        shld = Label(text="2. SHIELD = 20 ORE")
-        shld.pack()
-        shldbuybtn = Buyshield(text="BUY AND EQUIP SHIELD")
-        shldbuybtn["command"] = shldbuybtn.buyshield
-        shldbuybtn.pack()
-        verlassen = Button(text="EXIT", command=fenster.destroy)
-        verlassen.pack()
-
-        fenster.mainloop()
-
-
 game = Game()
-hole = Hole()
 rock = Rock()
 player = Player()
 text = Text()
 mouse = Mouse()
-enemys = Enemys()
+hole = Hole()
+enemys = Enemys(100, 100)
+enemys2 = Enemys(200, 200)
 castle = Castle()
-bush = Bush()
-camera_group = Camera()
+bush = Bush(100, 100)
+bush2 = Bush(200, 200)
 gamestate = Gamestate()
 playerinfo = Playerinfo()
 buymenu = Buymenu()
 
 
-camera_group.draw(game.screen)
 bush_group = pygame.sprite.Group()
 bush_group.add(bush)
 bush_group.draw(game.screen)
 player.gameover()
 player.level2up()
 hole.falling()
-enemys.death()
 castle.collision()
 
 gamestate.statemanager()
