@@ -1,7 +1,5 @@
-import sys
 import pygame
 from tkinter import *
-from shop1 import Buymenu
 
 coordinates_x = [0, 100, 200, 300, 400, 500, 600, 700]
 coordinates_y = [0, 100, 200, 300, 400, 500]
@@ -41,7 +39,7 @@ class Gamestate:
     def main_game(self):
         game.run()
 
-    def shop1(self):
+    def shop(self):
         player.playerx = 400
         player.playery = 300
         buymenu.buying()
@@ -66,6 +64,48 @@ class Bush(pygame.sprite.Sprite):
             self.rect.y = -100
 
 
+class Playerinfo:
+
+    def playerinfo(self):
+        fenster = Tk()
+        character = Label(text="CHARACTER")
+        character.pack()
+        level = Label(text="LEVEL:")
+        level.pack()
+        level2 = Label(text=player.lvl)
+        level2.pack()
+        exp = Label(text="EXPERIENCE:")
+        exp.pack()
+        exp2 = Label(text=player.xp)
+        exp2.pack()
+        score = Label(text="SCORE:")
+        score.pack()
+        score2 = Label(text=player.score)
+        score2.pack()
+        ore = Label(text="ORE:")
+        ore.pack()
+        ore2 = Label(text=player.ore)
+        ore2.pack()
+        potions = Label(text="POTIONS:")
+        potions.pack()
+        potions2 = Label(text=player.potions)
+        potions2.pack()
+        damage = Label(text="DAMAGE:")
+        damage.pack()
+        damage2 = Label(text=player.weapon)
+        damage2.pack()
+        armor = Label(text="ARMOR:")
+        armor.pack()
+        armor2 = Label(text=player.armor)
+        armor2.pack()
+        shield = Label(text="SHIELD PROTECTION:")
+        shield.pack()
+        shield2 = Label(text=player.currentshield)
+        shield2.pack()
+
+        fenster.mainloop()
+
+
 class Castle:
     def __init__(self):
         self.castleimg = pygame.image.load("castle.gif")
@@ -74,7 +114,7 @@ class Castle:
 
     def collision(self):
         if self.castlerect.colliderect(player.hitbox):
-            gamestate.shop1()
+            gamestate.shop()
         if self.castlerect2.colliderect(player.hitbox):
             print("RAUS HIER")
 
@@ -179,8 +219,13 @@ class Rock:
         self.rockrect2 = pygame.Rect(self.rockx[5], self.rocky[4], 32, 32)
         self.rockrect3 = pygame.Rect(self.rockx[7], self.rocky[3], 32, 32)
 
-    def currentstate(self):
-        pass
+    def nothingleft(self):
+        if game.timesnrfinaltry == 0:
+            game.screen.blit(self.rock_destroyed, (rock.rockx[3], rock.rocky[2]))
+        if game.timesnrfinaltry2 == 0:
+            game.screen.blit(self.rock_destroyed, (rock.rockx[5], rock.rocky[4]))
+        if game.timesnrfinaltry3 == 0:
+            game.screen.blit(self.rock_destroyed, (rock.rockx[7], rock.rocky[3]))
 
 
 class Player:
@@ -207,6 +252,9 @@ class Player:
         self.axe = 2
         self.bettersword = 3
         self.weapon = self.sword
+        self.none = 1
+        self.shield = 2
+        self.currentshield = self.none
 
     def movement(self, playerX_change, playerY_change):
         self.playerx += playerX_change
@@ -240,7 +288,6 @@ class Game:
         self.height = 600
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("ADVENTURE QUEST")
-        self.shop = pygame.image.load("shop1.png")
         self.explosionspell = pygame.image.load("explosion.gif")
         self.background = pygame.image.load("background.gif")
         self.title = pygame.image.load("title.png")
@@ -299,8 +346,7 @@ class Game:
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_f:
-                        print("EXP:", player.xp, "SCORE:", player.score, "ORE:", player.ore, "LIFEPOTIONS:", player.potions)
-                        print("WEAPON DAMAGE:", player.weapon)
+                        playerinfo.playerinfo()
                     if event.key == pygame.K_1 and player.mana > 0:
                         self.screen.blit(self.explosionspell, (mouse.posx, mouse.posy))
                         self.explosionspellhitbox = pygame.Rect(mouse.posx, mouse.posy, 32, 32)
@@ -314,7 +360,7 @@ class Game:
                     enemys.life += -player.weapon
                     print(enemys.life)
                 if enemys.enemyrect.colliderect(player.hitbox):
-                    player.life += -1
+                    player.life += -3 + player.currentshield
                 if event.type == pygame.MOUSEBUTTONDOWN and rock.rockrect.colliderect(mouse.mouserect) and player.hitbox.colliderect(rock.rockrect):
                     print("MINING")
                     self.timesnrfinaltry += -1
@@ -384,6 +430,7 @@ class Game:
             camera_group.__init__()
             mouse.__init__()
             bush.weaponfound()
+            rock.nothingleft()
             player.level2up()
             player.nomana()
             player.hitbox.x = player.playerx
@@ -392,6 +439,50 @@ class Game:
             pygame.display.update()
             clock = pygame.time.Clock()
             clock.tick(self.fps)
+
+
+class Buyshield(Button):
+
+    def buyshield(self):
+        if player.ore > 19:
+            player.currentshield = player.shield
+            player.ore += -20
+            print("THANK YOU VERY MUCH")
+        else:
+            print("NOT ENOUGH ORE")
+
+
+class Buybtrswrd(Button):
+
+    def buybtrswrd(self):
+        if player.ore > 29:
+            player.weapon = player.bettersword
+            player.ore += -30
+            print("THANK YOU VERY MUCH")
+        else:
+            print("NOT ENOUGH ORE")
+
+
+class Buymenu:
+
+    def buying(self):
+        fenster = Tk()
+        introtxt = Label(text="WHAT DO YOU WANT TO BUY?")
+        introtxt.pack()
+        btrswrd = Label(text="1. BETTER SWORD = 30 ORE")
+        btrswrd.pack()
+        btrswrdbuybtn = Buybtrswrd(text="BUY AND EQUIP BETTER SWORD")
+        btrswrdbuybtn["command"] = btrswrdbuybtn.buybtrswrd
+        btrswrdbuybtn.pack()
+        shld = Label(text="2. SHIELD = 20 ORE")
+        shld.pack()
+        shldbuybtn = Buyshield(text="BUY AND EQUIP SHIELD")
+        shldbuybtn["command"] = shldbuybtn.buyshield
+        shldbuybtn.pack()
+        verlassen = Button(text="EXIT", command=fenster.destroy)
+        verlassen.pack()
+
+        fenster.mainloop()
 
 
 game = Game()
@@ -405,6 +496,7 @@ castle = Castle()
 bush = Bush()
 camera_group = Camera()
 gamestate = Gamestate()
+playerinfo = Playerinfo()
 buymenu = Buymenu()
 
 
@@ -419,6 +511,3 @@ enemys.death()
 castle.collision()
 
 gamestate.statemanager()
-
-
-
