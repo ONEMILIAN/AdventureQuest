@@ -160,8 +160,6 @@ class Game:
             pygame.draw.rect(self.screen, (perfectgreen), rock.rockrect2)
             pygame.draw.rect(self.screen, (perfectgreen), rock.rockrect3)
             pygame.draw.rect(self.screen, (perfectgreen), castle.castlerect2)
-            pygame.draw.rect(game.screen, (100, 255, 100), enemys.enemyrect2)
-            game.screen.blit(enemys.currentstate, (enemys.enemyx, enemys.enemyy))
 
             self.screen.blit(self.background, (coordinates_x[0], coordinates_y[0]))
 
@@ -170,6 +168,9 @@ class Game:
             self.screen.blit(rock.rock, (rock.rockx[7], rock.rocky[3]))
 
             self.screen.blit(self.hole, (coordinates_x[4], coordinates_y[1]))
+            
+            pygame.draw.rect(game.screen, (100, 255, 100), enemys.enemyrect2)
+            game.screen.blit(enemys.currentstate, (enemys.enemyx, enemys.enemyy))
 
             self.screen.blit(castle.castleimg, (coordinates_x[5], coordinates_y[1]))
             self.screen.blit(castle.castleimg, (coordinates_x[1], coordinates_y[4]))
