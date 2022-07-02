@@ -1,13 +1,15 @@
 import pygame
-from player import Player
+from player import player
 from mouse import Mouse
 from enemys import Enemys
 from playerinfo import Playerinfo
 from buymenu import Buymenu
+from setup import setup
 from hole import Hole
+from ladder import ladder
 from bush import Bush
+from bush import Bush2
 from tkinter import *
-
 
 coordinates_x = [0, 100, 200, 300, 400, 500, 600, 700]
 coordinates_y = [0, 100, 200, 300, 400, 500]
@@ -54,7 +56,7 @@ class Gamestate:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         gamestate.main_game()
-            game.screen.blit(game.title, (0, 0))
+            setup.screen.blit(game.title, (0, 0))
             pygame.display.update()
 
     def main_game(self):
@@ -65,6 +67,81 @@ class Gamestate:
         player.playery = 300
         buymenu.buying()
         pygame.display.update()
+
+    def cave(self):
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_f:
+                        playerinfo.playerinfo()
+
+                if event.type == pygame.MOUSEBUTTONDOWN and enemys.enemyrect2.colliderect(mouse.mouserect) and player.hitbox.colliderect(enemys.enemyrect2):
+                    enemys.life += -player.weapon
+                    print(enemys.life)
+
+            pygame.draw.rect(setup.screen, (220, 100, 100), player.hitbox)
+            pygame.draw.rect(setup.screen, white, mouse.mouserect)
+            pygame.draw.rect(setup.screen, (220, 100, 100), ladder.rect)
+
+            setup.screen.blit(game.cave, (0, 0))
+
+
+
+            setup.screen.blit(player.currentchar, (player.playerx, player.playery))
+
+            setup.screen.blit(text.lifelife, text.lifeliferect)
+            setup.screen.blit(text.lifetext, text.lifetextrect)
+            setup.screen.blit(text.manatext, text.manatextrect)
+            setup.screen.blit(text.manamana, text.manamanarect)
+            setup.screen.blit(text.lvltext, text.lvltextrect)
+            setup.screen.blit(text.lvllvl, text.lvllvlrect)
+
+            text.__init__()
+
+            enemys.makedamage()
+            enemys.death()
+            enemys2.death()
+            enemys2.makedamage()
+            intothecave.collision2()
+            mouse.__init__()
+
+            player.hitbox.x = player.playerx
+            player.hitbox.y = player.playery
+
+            keys = pygame.key.get_pressed()
+
+            if keys[pygame.K_w]:
+                player.movement(0, -1.5)
+                player.currentchar = player.character
+
+            if keys[pygame.K_a]:
+                player.movement(-1.5, 0)
+                player.currentchar = player.characterleft
+
+            if keys[pygame.K_s]:
+                player.movement(0, 1.5)
+                player.currentchar = player.characterdown
+
+            if keys[pygame.K_d]:
+                player.movement(1.5, 0)
+                player.currentchar = player.characterright
+
+            pygame.display.update()
+            pygame.display.flip()
+            clock = pygame.time.Clock()
+            clock.tick(game.fps)
+
+
+class Intothecave:
+    def collision(self):
+        if hole.holerect.colliderect(player.hitbox):
+            gamestate.cave()
+    def collision2(self):
+        if ladder.rect.colliderect(player.hitbox):
+            gamestate.main_game()
 
 
 class Castle:
@@ -117,6 +194,8 @@ class Rock:
         self.rock = pygame.image.load("rock.gif")
         self.rock_destroyed = pygame.image.load("rock_destroyed.gif")
         self.rock_current_state1 = self.rock
+        self.rock_current_state2 = self.rock
+        self.rock_current_state3 = self.rock
         self.rockx = [0, 100, 200, 300, 400, 500, 600, 700]
         self.rocky = [0, 100, 200, 300, 400, 500]
         self.rockrect = pygame.Rect(self.rockx[3], self.rocky[2], 32, 32)
@@ -125,23 +204,19 @@ class Rock:
 
     def nothingleft(self):
         if game.timesnrfinaltry == 0:
-            game.screen.blit(self.rock_destroyed, (rock.rockx[3], rock.rocky[2]))
+            rock.rock_current_state1 = self.rock_destroyed
         if game.timesnrfinaltry2 == 0:
-            game.screen.blit(self.rock_destroyed, (rock.rockx[5], rock.rocky[4]))
+            rock.rock_current_state2 = self.rock_destroyed
         if game.timesnrfinaltry3 == 0:
-            game.screen.blit(self.rock_destroyed, (rock.rockx[7], rock.rocky[3]))
+            rock.rock_current_state3 = self.rock_destroyed
+
 
 class Game:
     def __init__(self):
-        pygame.init()
-        self.width = 800
-        self.height = 600
-        self.canvas = pygame.Surface((self.width, self.height))
-        self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("ADVENTURE QUEST")
         self.explosionspell = pygame.image.load("explosion.gif")
         self.background = pygame.image.load("background.gif")
         self.title = pygame.image.load("title.png")
+        self.cave = pygame.image.load("cave.gif")
         self.timesnrfinaltry = 10
         self.timesnrfinaltry2 = 10
         self.timesnrfinaltry3 = 10
@@ -151,45 +226,44 @@ class Game:
 
     def run(self):
         while running:
-            self.screen.fill((self.color))
-            pygame.draw.rect(self.screen, white, mouse.mouserect)
-            pygame.draw.rect(self.screen, (perfectgreen), player.hitbox)
-            pygame.draw.rect(self.screen, (perfectgreen), hole.holerect)
-            pygame.draw.rect(self.screen, (perfectgreen), rock.rockrect)
-            pygame.draw.rect(self.screen, (perfectgreen), castle.castlerect)
-            pygame.draw.rect(self.screen, (perfectgreen), rock.rockrect2)
-            pygame.draw.rect(self.screen, (perfectgreen), rock.rockrect3)
-            pygame.draw.rect(self.screen, (perfectgreen), castle.castlerect2)
+            setup.screen.fill((self.color))
+            pygame.draw.rect(setup.screen, white, mouse.mouserect)
+            pygame.draw.rect(setup.screen, (perfectgreen), player.hitbox)
+            pygame.draw.rect(setup.screen, (perfectgreen), hole.holerect)
+            enemys.drawrect((100, 255, 100))
+            enemys2.drawrect((100, 255, 100))
+            pygame.draw.rect(setup.screen, (perfectgreen), rock.rockrect)
+            pygame.draw.rect(setup.screen, (perfectgreen), castle.castlerect)
+            pygame.draw.rect(setup.screen, (perfectgreen), rock.rockrect2)
+            pygame.draw.rect(setup.screen, (perfectgreen), rock.rockrect3)
+            pygame.draw.rect(setup.screen, (perfectgreen), castle.castlerect2)
 
-            self.screen.blit(self.background, (coordinates_x[0], coordinates_y[0]))
+            setup.screen.blit(self.background, (coordinates_x[0], coordinates_y[0]))
 
-            self.screen.blit(rock.rock_current_state1, (rock.rockx[3], rock.rocky[2]))
-            self.screen.blit(rock.rock, (rock.rockx[5], rock.rocky[4]))
-            self.screen.blit(rock.rock, (rock.rockx[7], rock.rocky[3]))
+            setup.screen.blit(rock.rock_current_state1, (rock.rockx[3], rock.rocky[2]))
+            setup.screen.blit(rock.rock_current_state2, (rock.rockx[5], rock.rocky[4]))
+            setup.screen.blit(rock.rock_current_state3, (rock.rockx[7], rock.rocky[3]))
 
-            self.screen.blit(self.hole, (coordinates_x[4], coordinates_y[1]))
-            
-            pygame.draw.rect(game.screen, (100, 255, 100), enemys.enemyrect2)
-            game.screen.blit(enemys.currentstate, (enemys.enemyx, enemys.enemyy))
+            setup.screen.blit(self.hole, (coordinates_x[4], coordinates_y[1]))
 
-            self.screen.blit(castle.castleimg, (coordinates_x[5], coordinates_y[1]))
-            self.screen.blit(castle.castleimg, (coordinates_x[1], coordinates_y[4]))
+            setup.screen.blit(castle.castleimg, (coordinates_x[5], coordinates_y[1]))
+            setup.screen.blit(castle.castleimg, (coordinates_x[1], coordinates_y[4]))
 
-            self.screen.blit(bush.image, (bush.locx, bush.locy))
-            self.screen.blit(bush.image, (bush.locx, bush.locy))
-            self.screen.blit(bush.image, (bush.locx, bush.locy))
-            self.screen.blit(bush.image, (bush.locx, bush.locy))
-            self.screen.blit(bush.image, (bush.locx, bush.locy))
-            self.screen.blit(bush.image, (bush.locx, bush.locy))
+            setup.screen.blit(bush.image, (bush.locx, bush.locy))
+            setup.screen.blit(bush.image, (bush.locx, bush.locy))
+            setup.screen.blit(bush.image, (bush.locx, bush.locy))
+            setup.screen.blit(bush.image, (bush.locx, bush.locy))
+            setup.screen.blit(bush.image, (bush.locx, bush.locy))
+            setup.screen.blit(bush.image, (bush.locx, bush.locy))
 
-            self.screen.blit(player.currentchar, (player.playerx, player.playery))
+            setup.screen.blit(player.currentchar, (player.playerx, player.playery))
 
-            self.screen.blit(text.lifelife, text.lifeliferect)
-            self.screen.blit(text.lifetext, text.lifetextrect)
-            self.screen.blit(text.manatext, text.manatextrect)
-            self.screen.blit(text.manamana, text.manamanarect)
-            self.screen.blit(text.lvltext, text.lvltextrect)
-            self.screen.blit(text.lvllvl, text.lvllvlrect)
+            setup.screen.blit(text.lifelife, text.lifeliferect)
+            setup.screen.blit(text.lifetext, text.lifetextrect)
+            setup.screen.blit(text.manatext, text.manatextrect)
+            setup.screen.blit(text.manamana, text.manamanarect)
+            setup.screen.blit(text.lvltext, text.lvltextrect)
+            setup.screen.blit(text.lvllvl, text.lvllvlrect)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -199,14 +273,23 @@ class Game:
                     if event.key == pygame.K_f:
                         playerinfo.playerinfo()
                     if event.key == pygame.K_1 and player.mana > 0:
-                        self.screen.blit(self.explosionspell, (mouse.posx, mouse.posy))
+                        setup.screen.blit(self.explosionspell, (mouse.posx, mouse.posy))
                         self.explosionspellhitbox = pygame.Rect(mouse.posx, mouse.posy, 32, 32)
-                        pygame.draw.rect(self.screen, (perfectgreen), self.explosionspellhitbox)
+                        pygame.draw.rect(setup.screen, (perfectgreen), self.explosionspellhitbox)
                         player.mana += -7
                     if event.key == pygame.K_q and player.potions > 0:
                         player.potions += -1
                         print("POTION DRANK ", player.potions, " LEFT")
                         player.life = player.maxlife
+                    if event.type == pygame.MOUSEBUTTONDOWN and enemys.enemyrect2.colliderect(mouse.mouserect) and player.hitbox.colliderect(enemys.enemyrect2):
+                        enemys.life += -player.weapon
+                        print(enemys.life)
+                if event.type == pygame.MOUSEBUTTONDOWN and enemys.enemyrect2.colliderect(mouse.mouserect) and player.hitbox.colliderect(enemys.enemyrect2):
+                    enemys.life += -player.weapon
+                    print(enemys.life)
+                if event.type == pygame.MOUSEBUTTONDOWN and enemys2.enemyrect2.colliderect(mouse.mouserect) and player.hitbox.colliderect(enemys2.enemyrect2):
+                    enemys.life += -player.weapon
+                    print(enemys.life)
                 if event.type == pygame.MOUSEBUTTONDOWN and rock.rockrect.colliderect(mouse.mouserect) and player.hitbox.colliderect(rock.rockrect):
                     print("MINING")
                     self.timesnrfinaltry += -1
@@ -270,23 +353,29 @@ class Game:
             hole.falling()
             player.gameover()
 
-            bush2.__init__(200, 200)
+            bush.__init__(100, 100)
+            bush.weaponfound()
+            bush2.__init__(250, 200)
+            bush3.__init__(350, 450)
+            bush4.__init__(650, 150)
 
-            enemys.__init__(400, 500)
+            enemys.draw()
             enemys.getdamage()
             enemys.makedamage()
             enemys.death()
 
-            enemys2.__init__(300, 300)
-            enemys.death()
-            enemys.getdamage()
-            enemys.makedamage()
+            enemys2.draw()
+            enemys2.getdamage()
+            enemys2.makedamage()
+            enemys2.death()
 
             castle.collision()
             rock.__init__()
             text.__init__()
             mouse.__init__()
-            bush.weaponfound()
+
+            intothecave.collision()
+
             rock.nothingleft()
             player.level2up()
             player.nomana()
@@ -294,29 +383,32 @@ class Game:
             player.hitbox.y = player.playery
 
             pygame.display.update()
+
             clock = pygame.time.Clock()
             clock.tick(self.fps)
 
 
 game = Game()
 rock = Rock()
-player = Player()
 text = Text()
 mouse = Mouse()
 hole = Hole()
-enemys = Enemys(100, 100)
-enemys2 = Enemys(200, 200)
+enemys = Enemys(300, 300)
+enemys2 = Enemys(450, 550)
 castle = Castle()
-bush = Bush(100, 100)
-bush2 = Bush(200, 200)
+bush = Bush(0, 0)
+bush2 = Bush2(0, 0)
+bush3 = Bush2(0, 0)
+bush4 = Bush2(0, 0)
 gamestate = Gamestate()
 playerinfo = Playerinfo()
 buymenu = Buymenu()
+intothecave = Intothecave()
 
-
+bush.weaponfound()
 bush_group = pygame.sprite.Group()
 bush_group.add(bush)
-bush_group.draw(game.screen)
+bush_group.draw(setup.screen)
 player.gameover()
 player.level2up()
 hole.falling()
