@@ -2,6 +2,7 @@ import pygame
 
 from player import player
 from mouse import mouse
+from setup import setup
 
 
 class Enemys:
@@ -12,11 +13,15 @@ class Enemys:
         self.life = 5
         self.enemyx = x
         self.enemyy = y
-        self.enemyrect = pygame.Rect(x, y, 32, 32)
         self.enemyrect2 = self.currentstate.get_rect()
-        self.enemyrect2.x = x
-        self.enemyrect2.y = y
+        self.enemyrect2.x = self.enemyx
+        self.enemyrect2.y = self.enemyy
 
+    def draw(self):
+        setup.screen.blit(self.currentstate, (self.enemyx, self.enemyy))
+
+    def drawrect(self, rectcolor):
+        pygame.draw.rect(setup.screen, rectcolor, self.enemyrect2)
 
     def getdamage(self):
         for event in pygame.event.get():
@@ -35,5 +40,8 @@ class Enemys:
             player.xp += 250
             player.score += 90
             self.currentstate = self.enemysdead
-            self.enemyrect.x = -100
-            self.enemyrect.y = -100
+            self.enemyrect2.x = -100
+            self.enemyrect2.y = -100
+
+
+enemys = Enemys(0, 0)
