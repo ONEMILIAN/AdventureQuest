@@ -77,18 +77,21 @@ class Gamestate:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_f:
                         playerinfo.playerinfo()
+                    if event.key == pygame.K_q and player.potions > 0:
+                        player.potions += -1
+                        print("POTION DRANK ", player.potions, " LEFT")
+                        player.life = player.maxlife
 
-                if event.type == pygame.MOUSEBUTTONDOWN and enemys.enemyrect2.colliderect(mouse.mouserect) and player.hitbox.colliderect(enemys.enemyrect2):
+                if event.type == pygame.MOUSEBUTTONDOWN and enemys3.enemyrect2.colliderect(mouse.mouserect) and player.hitbox.colliderect(enemys3.enemyrect2):
                     enemys.life += -player.weapon
                     print(enemys.life)
 
             pygame.draw.rect(setup.screen, (220, 100, 100), player.hitbox)
             pygame.draw.rect(setup.screen, white, mouse.mouserect)
             pygame.draw.rect(setup.screen, (220, 100, 100), ladder.rect)
+            enemys3.drawrect((220, 100, 100))
 
             setup.screen.blit(game.cave, (0, 0))
-
-
 
             setup.screen.blit(player.currentchar, (player.playerx, player.playery))
 
@@ -101,10 +104,10 @@ class Gamestate:
 
             text.__init__()
 
-            enemys.makedamage()
-            enemys.death()
-            enemys2.death()
-            enemys2.makedamage()
+            enemys3.draw()
+            enemys3.makedamage()
+            enemys3.getdamage()
+            enemys3.death()
             intothecave.collision2()
             mouse.__init__()
 
@@ -274,8 +277,6 @@ class Game:
                         playerinfo.playerinfo()
                     if event.key == pygame.K_1 and player.mana > 0:
                         setup.screen.blit(self.explosionspell, (mouse.posx, mouse.posy))
-                        self.explosionspellhitbox = pygame.Rect(mouse.posx, mouse.posy, 32, 32)
-                        pygame.draw.rect(setup.screen, (perfectgreen), self.explosionspellhitbox)
                         player.mana += -7
                     if event.key == pygame.K_q and player.potions > 0:
                         player.potions += -1
@@ -395,6 +396,7 @@ mouse = Mouse()
 hole = Hole()
 enemys = Enemys(300, 300)
 enemys2 = Enemys(450, 550)
+enemys3 = Enemys(200, 400)
 castle = Castle()
 bush = Bush(0, 0)
 bush2 = Bush2(0, 0)
