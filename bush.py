@@ -1,16 +1,15 @@
 import pygame
 from player import player
+from setup import setup
 
 
 class Bush(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, rectx, recty):
         super().__init__()
         self.image = pygame.image.load("bush.gif")
         self.rect = self.image.get_rect()
-        self.locx = x
-        self.locy = y
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = rectx
+        self.rect.y = recty
 
     def weaponfound(self):
         if self.rect.colliderect(player.hitbox):
@@ -18,3 +17,18 @@ class Bush(pygame.sprite.Sprite):
             player.weapon = player.axe
             self.rect.x = -100
             self.rect.y = -100
+
+    def draw(self, posx, posy):
+        setup.screen.blit(self.image, (posx, posy))
+
+    def drawrect(self, rectcolor):
+        pygame.draw.rect(setup.screen, rectcolor, self.rect)
+
+
+class Bush2(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.img = pygame.image.load("bush.gif")
+
+    def draw(self, posx, posy):
+        setup.screen.blit(self.img, (posx, posy))
