@@ -1,0 +1,9 @@
+Adventure Quest is an Open Top Down RPG
+
+W = UP
+A = LEFT
+S = DOWN
+D = RIGHT
+
+Q = DRINK LIFE-POTION
+F = INFO FOR EXP,SCORES & ORES
